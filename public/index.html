@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Discover verified Indian Government scholarships with a special focus on Karnataka (SSP - State Scholarship Portal) and Central schemes (NSP, AICTE, UGC). Check student eligibility transparently.">
+  <title>Government Scholarship Finder | Karnataka & Central Financial Aid</title>
+
+  <!-- Google Fonts: Inter for crisp, accessible typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ======================================================== -->
+  <!-- 1. TOP NAVIGATION BAR                                    -->
+  <!-- ======================================================== -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand" aria-label="Government Scholarship Finder Homepage">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">GovScholarship</span>
+          <span class="brand-subtitle">Karnataka & Central Schemes</span>
+        </div>
+      </a>
+
+      <!-- Mobile Navigation Hamburger Button -->
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <!-- Navigation Links -->
+      <nav class="nav-menu" id="navMenu">
+        <a href="#schemesSection" class="nav-link active">Explore Schemes</a>
+        <a href="#checkerSection" class="nav-link highlight-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          Check Eligibility
+        </a>
+        <a href="#disclaimerSection" class="nav-link">Important Notice</a>
+        <a href="#guideSection" class="nav-link">Karnataka & Central Guide</a>
+        <a href="#aboutSection" class="nav-link">About Project</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 2. HERO SECTION WITH SIMPLE SEARCH OPTION                -->
+  <!-- ======================================================== -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="badge-project-group">
+        <span class="badge-project">Academic CSE Project • Linux Mint & Express</span>
+        <span class="badge-karnataka-pill">
+          <span class="karnataka-flag-dot"></span> Karnataka SSP & Central Directory
+        </span>
+      </div>
+
+      <h1 class="hero-title">Government Scholarship Finder</h1>
+      <p class="hero-subtitle">
+        Discover verified scholarship schemes from the <strong>Government of Karnataka (State Scholarship Portal - SSP)</strong> and <strong>Central Government (NSP, AICTE, UGC)</strong>. Instant access to official portal links, authentic eligibility requirements, and benefit details.
+      </p>
+
+      <!-- Simple, Streamlined Search Bar -->
+      <div class="search-card simple-search-card">
+        <form id="searchForm" class="simple-search-form" onsubmit="return false;">
+          
+          <div class="simple-search-row">
+            <div class="simple-input-wrapper">
+              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input 
+                type="text" 
+                id="searchInput" 
+                class="simple-search-input" 
+                placeholder="Search scholarships by scheme name, keyword, eligibility, state (e.g. Karnataka SSP, SC, Vidyasiri, Engineering, Girls)..."
+                autocomplete="off"
+              >
+              <button type="button" id="clearSearchBtn" class="clear-btn" aria-label="Clear search input" title="Clear search">×</button>
+            </div>
+
+            <button type="button" id="searchSubmitBtn" class="btn btn-primary simple-search-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              Search
+            </button>
+          </div>
+
+          <!-- Quick Suggestion / Category Chips -->
+          <div class="quick-filter-chips" id="quickFilterChips">
+            <span class="chips-label">Popular Searches:</span>
+            <button type="button" class="chip-btn active" data-query="">All Schemes</button>
+            <button type="button" class="chip-btn" data-query="Karnataka SSP">🏛️ Karnataka SSP</button>
+            <button type="button" class="chip-btn" data-query="Vidyasiri">Vidyasiri (OBC)</button>
+            <button type="button" class="chip-btn" data-query="SC ST">SC / ST</button>
+            <button type="button" class="chip-btn" data-query="Engineering Diploma">Engineering & Diploma</button>
+            <button type="button" class="chip-btn" data-query="Girls Pragati">Girls in STEM</button>
+            <button type="button" class="chip-btn" data-query="Minority">Minority</button>
+            <button type="button" class="chip-btn" data-query="Central NSP">Central NSP</button>
+            <button type="button" class="chip-btn" data-query="Laptop">Free Laptop</button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Quick Metrics Counter -->
+      <div class="metrics-row">
+        <div class="metric-item">
+          <span class="metric-num" id="metricTotal">--</span>
+          <span class="metric-label">Total Schemes</span>
+        </div>
+        <div class="metric-divider"></div>
+        <div class="metric-item">
+          <span class="metric-num" id="metricKarnataka">--</span>
+          <span class="metric-label">Karnataka SSP Schemes</span>
+        </div>
+        <div class="metric-divider"></div>
+        <div class="metric-item">
+          <span class="metric-num" id="metricVerified">--</span>
+          <span class="metric-label">Official Verified</span>
+        </div>
+        <div class="metric-divider"></div>
+        <div class="metric-item">
+          <span class="metric-num">100%</span>
+          <span class="metric-label">Direct Portal Access</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 3. MAIN CONTENT CONTAINER                                -->
+  <!-- ======================================================== -->
+  <main class="main-container">
+
+    <!-- Official Guidelines & Transparency Banner -->
+    <section id="disclaimerSection" class="notice-banner" aria-label="Official Guidelines & Transparency Notice">
+      <div class="notice-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <div class="notice-text">
+        <h2 class="notice-title">Official Guidelines & Transparency Notice</h2>
+        <p>
+          <strong>No Invented Information:</strong> All eligibility criteria, income thresholds, and benefit amounts are extracted directly from official guidelines published by the
+          <a href="https://ssp.postmatric.karnataka.gov.in/" target="_blank" rel="noopener noreferrer">Karnataka State Scholarship Portal (ssp.postmatric.karnataka.gov.in)</a> and the
+          <a href="https://scholarships.gov.in/" target="_blank" rel="noopener noreferrer">National Scholarship Portal (scholarships.gov.in)</a>.
+          Deadlines vary each academic session; students must always verify active application cycles directly on the designated portals. Demonstration test entries are labeled with an amber <span class="badge badge-demo-inline">Demonstration Record</span> badge.
+        </p>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 4. SCHOLARSHIPS DIRECTORY GRID SECTION                   -->
+    <!-- ======================================================== -->
+    <section id="schemesSection" class="schemes-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Available Scholarships & Grants</h2>
+          <p class="section-subtitle" id="resultsCount">Showing all schemes</p>
+        </div>
+        <div class="sort-indicator" id="filterIndicator">
+          <span class="indicator-dot"></span> Live Directory Active
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="state-container loading-state" style="display: none;">
+        <div class="spinner"></div>
+        <p class="state-title">Loading scholarship schemes...</p>
+        <p class="state-desc">Fetching records from our local Express server.</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="errorState" class="state-container error-state" style="display: none;">
+        <div class="state-icon error-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <p class="state-title" id="errorMessage">Unable to connect to the server</p>
+        <p class="state-desc">Please ensure the Express server is running on port 3000 and try again.</p>
+        <button type="button" class="btn btn-primary" id="retryBtn">Retry Fetching</button>
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="state-container empty-state" style="display: none;">
+        <div class="state-icon empty-icon">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+        </div>
+        <p class="state-title">No Scholarships Matched Your Search</p>
+        <p class="state-desc">
+          We couldn't find any scholarship scheme matching your current search. 
+          Try searching for broader keywords like <em>"Karnataka"</em>, <em>"merit"</em>, <em>"degree"</em>, or reset your search.
+        </p>
+        <button type="button" class="btn btn-primary" id="emptyResetBtn">View All Scholarships</button>
+      </div>
+
+      <!-- Scholarships Cards Grid -->
+      <div id="scholarshipsGrid" class="scholarships-grid" aria-live="polite">
+        <!-- Cards dynamically injected by app.js -->
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 5. STUDENT ELIGIBILITY CHECKER SECTION                   -->
+    <!-- ======================================================== -->
+    <section id="checkerSection" class="checker-section">
+      <div class="checker-card">
+        <div class="checker-header">
+          <div class="checker-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <polyline points="16 11 18 13 22 9"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h2 class="checker-title">Interactive Student Eligibility Checker</h2>
+            <p class="checker-subtitle">
+              Enter your student profile details below. The system evaluates each scholarship rule-by-rule, showing clear reasons for matches, mismatches, and unverified data without misleading percentage scores.
+            </p>
+          </div>
+        </div>
+
+        <!-- Checker Form -->
+        <form id="eligibilityForm" class="checker-form" novalidate>
+          <div class="checker-form-grid">
+            
+            <!-- Education Level -->
+            <div class="form-group">
+              <label for="checkLevel" class="checker-label">Current Education Level *</label>
+              <select id="checkLevel" class="checker-control" required>
+                <option value="undergraduate">Undergraduate Degree (B.E., B.Tech, B.Sc, B.Com, B.A.)</option>
+                <option value="post-matric">Post-Matric (PUC, Class 11-12, ITI)</option>
+                <option value="technical">Technical Degree & Diploma</option>
+                <option value="diploma">Polytechnic Diploma</option>
+                <option value="secondary">Secondary School (Class 9-10)</option>
+                <option value="postgraduate">Postgraduate (M.Tech, M.Sc, M.Com, MBA)</option>
+              </select>
+            </div>
+
+            <!-- Domicile State (Karnataka Focus) -->
+            <div class="form-group">
+              <label for="checkState" class="checker-label">Permanent Domicile State *</label>
+              <select id="checkState" class="checker-control" required>
+                <option value="Karnataka" selected>Karnataka (Eligible for SSP & Central Schemes)</option>
+                <option value="Other">Other State / Union Territory</option>
+              </select>
+            </div>
+
+            <!-- Social Category / Caste -->
+            <div class="form-group">
+              <label for="checkCategory" class="checker-label">Social Category / Community *</label>
+              <select id="checkCategory" class="checker-control" required>
+                <option value="SC">Scheduled Caste (SC)</option>
+                <option value="ST">Scheduled Tribe (ST)</option>
+                <option value="Cat-1">OBC Category-1 (Karnataka)</option>
+                <option value="Cat-2A">OBC Category-2A (Karnataka)</option>
+                <option value="Cat-3A">OBC Category-3A / 3B / 2B</option>
+                <option value="Minority">Minority (Muslim, Christian, Jain, Buddhist, Sikh, Parsi)</option>
+                <option value="General">General / EWS</option>
+              </select>
+            </div>
+
+            <!-- Annual Family Income -->
+            <div class="form-group">
+              <label for="checkIncome" class="checker-label">Annual Family Income (in ₹) *</label>
+              <input 
+                type="number" 
+                id="checkIncome" 
+                class="checker-control" 
+                placeholder="e.g. 150000" 
+                min="0" 
+                max="10000000" 
+                value="150000" 
+                required
+              >
+              <small class="field-hint">As certified in current revenue / Tahsildar income certificate.</small>
+            </div>
+
+            <!-- Academic Score / Percentage -->
+            <div class="form-group">
+              <label for="checkPercentage" class="checker-label">Previous Exam Percentage (%) *</label>
+              <input 
+                type="number" 
+                id="checkPercentage" 
+                class="checker-control" 
+                placeholder="e.g. 75" 
+                min="0" 
+                max="100" 
+                value="75" 
+                required
+              >
+              <small class="field-hint">Aggregate marks percentage in your last qualifying exam.</small>
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+              <label for="checkGender" class="checker-label">Gender *</label>
+              <select id="checkGender" class="checker-control" required>
+                <option value="FEMALE">Female (Includes Women in STEM Schemes)</option>
+                <option value="MALE" selected>Male</option>
+                <option value="ANY">Other / Prefer not to specify</option>
+              </select>
+            </div>
+
+            <!-- Disability / PwD Status -->
+            <div class="form-group">
+              <label for="checkDisability" class="checker-label">Specially Abled (PwD ≥ 40%) *</label>
+              <select id="checkDisability" class="checker-control" required>
+                <option value="false" selected>No</option>
+                <option value="true">Yes (Benchmark Disability Certification Available)</option>
+              </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-group checker-actions-cell">
+              <label class="checker-label">&nbsp;</label>
+              <div class="checker-btn-group">
+                <button type="submit" id="checkEligibilityBtn" class="btn btn-primary checker-submit-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                  Evaluate Eligibility
+                </button>
+                <button type="button" id="clearCheckerBtn" class="btn btn-secondary">
+                  Reset Form
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </form>
+
+        <!-- Eligibility Results Container (Rendered by app.js) -->
+        <div id="checkerResults" class="checker-results" style="display: none;" aria-live="polite">
+          <!-- Dynamic results injected here -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 6. APPLICATION GUIDE SECTION (KARNATAKA & CENTRAL)       -->
+    <!-- ======================================================== -->
+    <section id="guideSection" class="guide-section">
+      <div class="guide-card">
+        <h2 class="guide-title">Scholarship Application Guide for Karnataka Students</h2>
+        <div class="guide-grid">
+          
+          <div class="guide-step">
+            <div class="step-num">1</div>
+            <h3 class="step-heading">SSP Student Account & Aadhaar</h3>
+            <p class="step-desc">
+              Create your Student Account on the Karnataka State Scholarship Portal (SSP). Ensure your Aadhaar number is seeded and linked with your active bank account for DBT transfers.
+            </p>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">2</div>
+            <h3 class="step-heading">Caste & Income RD Numbers</h3>
+            <p class="step-desc">
+              Obtain authentic RD numbers (15-digit) from Karnataka Nadakacheri for your Caste/Category and Income certificates. The SSP portal verifies these numbers directly with revenue databases.
+            </p>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">3</div>
+            <h3 class="step-heading">E-Attestation of Documents</h3>
+            <p class="step-desc">
+              Have your college documents (Bonafide certificate, marks cards, fee receipts) e-attested by your college E-Attestation officer before finalizing your application on SSP.
+            </p>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">4</div>
+            <h3 class="step-heading">NSP & Central Schemes</h3>
+            <p class="step-desc">
+              For Central schemes (like PM-USP, AICTE Pragati, Saksham), register on the National Scholarship Portal (NSP) with your OTR (One Time Registration) number.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 7. ABOUT THE PROJECT SECTION                             -->
+    <!-- ======================================================== -->
+    <section id="aboutSection" class="about-section">
+      <div class="about-card">
+        <h2 class="about-title">About This College CSE Project</h2>
+        <p class="about-desc">
+          The <strong>Government Scholarship Finder</strong> was created as an academic Computer Science & Engineering (CSE) curriculum project to simplify the discovery of higher education financial aid for Indian students, with a primary focus on Karnataka state schemes (SSP) and Central Government initiatives.
+        </p>
+        <div class="tech-pills">
+          <span class="tech-pill">Node.js Runtime</span>
+          <span class="tech-pill">Express REST API</span>
+          <span class="tech-pill">Karnataka SSP Focus</span>
+          <span class="tech-pill">Rule-Based Eligibility Checker</span>
+          <span class="tech-pill">Semantic HTML5</span>
+          <span class="tech-pill">Responsive Navy UI</span>
+          <span class="tech-pill">Zero Paid APIs</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- 8. MODAL DIALOG FOR FULL SCHEME GUIDELINES               -->
+  <!-- ======================================================== -->
+  <div id="detailModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-box">
+      <button type="button" class="modal-close" id="modalCloseBtn" aria-label="Close details dialog">&times;</button>
+      
+      <div class="modal-header">
+        <div id="modalStatusBadge"></div>
+        <h3 id="modalTitle" class="modal-title">Scholarship Title</h3>
+        <p id="modalProvider" class="modal-provider">Provider Name</p>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Key Metadata Row -->
+        <div class="modal-info-row">
+          <div class="info-cell">
+            <span class="info-cell-label">Education Level</span>
+            <span class="info-cell-value" id="modalLevel">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-cell-label">Scheme Scope & Portal</span>
+            <span class="info-cell-value" id="modalScope">--</span>
+          </div>
+        </div>
+
+        <div class="modal-info-row">
+          <div class="info-cell">
+            <span class="info-cell-label">Academic Session</span>
+            <span class="info-cell-value" id="modalAcademicYear">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-cell-label">Target Category</span>
+            <span class="info-cell-value" id="modalCategory">--</span>
+          </div>
+        </div>
+
+        <!-- Benefits breakdown -->
+        <div class="modal-block">
+          <h4 class="block-label">Financial Benefits & Fee Waivers</h4>
+          <p id="modalBenefits" class="block-content">--</p>
+        </div>
+
+        <!-- Eligibility criteria -->
+        <div class="modal-block">
+          <h4 class="block-label">Eligibility Criteria Summary</h4>
+          <p id="modalEligibility" class="block-content">--</p>
+        </div>
+
+        <!-- Verification details & Deadline note -->
+        <div class="modal-block note-block" id="modalNoteBlock">
+          <h4 class="block-label">Official Guidelines & Application Timeline Note</h4>
+          <p id="modalDeadlineNote" class="block-content">--</p>
+          <p id="modalVerificationNote" class="verification-desc">--</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="modalDismissBtn">Close</button>
+        <a href="#" id="modalSourceLink" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          Visit Official Portal
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 9. FOOTER                                                -->
+  <!-- ======================================================== -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="footer-logo">Government Scholarship Finder</span>
+        <p class="footer-tagline">Academic CSE Demonstration Project • Designed for Indian Students & Karnataka SSP</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://ssp.postmatric.karnataka.gov.in/" target="_blank" rel="noopener noreferrer">Karnataka SSP Portal</a>
+        <a href="https://scholarships.gov.in/" target="_blank" rel="noopener noreferrer">National Scholarship Portal (NSP)</a>
+        <a href="https://www.aicte-india.org/" target="_blank" rel="noopener noreferrer">AICTE Student Schemes</a>
+      </div>
+      <div class="footer-disclaimer">
+        Disclaimer: This website is an educational demonstration project. Information displayed is curated from published government circulars.
+        Always refer to the official government portals for live session circulars, application deadlines, and statutory terms.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Frontend Logic Script -->
+  <script src="app.js"></script>
+</body>
+</html>
