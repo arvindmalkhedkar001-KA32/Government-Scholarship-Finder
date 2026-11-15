@@ -77,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Local state
   let currentScholarships = [];
   let searchDebounceTimer = null;
-  const apiBaseUrl = window.SCHOLARSHIP_API_BASE_URL.replace(/\/+$/, '');
+  let activeSearchController = null;
+  const apiBaseUrl = (window.SCHOLARSHIP_API_BASE_URL || window.location.origin || '').replace(/\/+$/, '');
 
   // ========================================================
   // 2. FETCH SCHOLARSHIPS DIRECTORY
@@ -85,8 +86,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * Fetches scholarship schemes from the Express backend matching the simple search query.
+   * Features:
+   * - In-flight request cancellation (prevents duplicate requests and race conditions)
+   * - 8-second request timeout (prevents infinite loading spinner)
    */
   async function fetchScholarships() {
+    // 1. Abort any previous in-flight search request to prevent race conditions
+    if (activeSearchController) {
+      activeSearchController.abort();
+    }
+    const controller = new AbortController();
+    activeSearchController = controller;
+
     setUiState('loading');
 
     const query = searchInput.value.trim();
@@ -95,8 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiUrl = `${apiBaseUrl}/api/scholarships?${params.toString()}`;
 
+    // 2. 8-second request timeout
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 8000);
+
     try {
-      const response = await fetch(apiUrl);
+      const response = await fetch(apiUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
         throw new Error(`Server returned HTTP ${response.status}`);
       }
@@ -110,9 +128,22 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(result.message || 'Malformed data response from server.');
       }
     } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        // Only show error if this was a timeout and still the active controller
+        if (controller.signal.aborted && activeSearchController === controller) {
+          errorMessage.textContent = 'Request timed out after 8 seconds. Please check that the server is reachable.';
+          setUiState('error');
+        }
+        return;
+      }
       console.error('Fetch error:', err);
       errorMessage.textContent = err.message || 'Unable to connect to the server.';
       setUiState('error');
+    } finally {
+      if (activeSearchController === controller) {
+        activeSearchController = null;
+      }
     }
   }
 
@@ -160,29 +191,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     list.forEach((scheme) => {
       const card = document.createElement('article');
-      card.className = `scholarship-card ${scheme.isVerified ? 'is-verified' : 'is-demo'}`;
+      const cardClass = scheme.verificationStatus === 'pending-verification'
+        ? 'is-pending'
+        : (scheme.isVerified ? 'is-verified' : 'is-demo');
+      card.className = `scholarship-card ${cardClass}`;
       card.setAttribute('aria-label', scheme.name || 'Scholarship Scheme');
 
       // 1. Verification status badge
-      const verifyBadgeHtml = scheme.isVerified
-        ? `<span class="badge badge-verified">
-             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-               <polyline points="20 6 9 17 4 12"></polyline>
-             </svg>
-             Official Government Scheme
-           </span>`
-        : `<span class="badge badge-demo">
-             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-               <circle cx="12" cy="12" r="10"></circle>
-               <line x1="12" y1="8" x2="12" y2="12"></line>
-               <line x1="12" y1="16" x2="12.01" y2="16"></line>
-             </svg>
-             Demonstration Record
-           </span>`;
+      let verifyBadgeHtml = '';
+      if (scheme.verificationStatus === 'pending-verification') {
+        verifyBadgeHtml = `
+          <span class="badge badge-pending">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Pending Verification
+          </span>
+        `;
+      } else if (scheme.isVerified) {
+        verifyBadgeHtml = `
+          <span class="badge badge-verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Official Government Scheme
+          </span>
+        `;
+      } else {
+        verifyBadgeHtml = `
+          <span class="badge badge-demo">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            Demonstration Record
+          </span>
+        `;
+      }
 
       // 2. Scope / Region badge
       let scopeBadgeHtml = '';
-      if (scheme.scope === 'Karnataka') {
+      if (scheme.scope === 'Karnataka' || (scheme.scope === 'State' && scheme.state === 'Karnataka')) {
         scopeBadgeHtml = `<span class="badge badge-karnataka">🏛️ Karnataka (SSP)</span>`;
       } else if (scheme.scope === 'Central') {
         scopeBadgeHtml = `<span class="badge badge-central">🇮🇳 Central Government</span>`;
@@ -191,18 +242,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // 3. Fallbacks for missing/partial fields
+      const safeId = escapeHtml(scheme.id || '');
       const safeName = escapeHtml(scheme.name || 'Untitled Scholarship Scheme');
       const safeProvider = escapeHtml(scheme.provider || 'Department / Ministry Not Specified');
-      const safeLevel = escapeHtml(scheme.level || 'Education Level: Check Official Guidelines');
-      const safeCategory = escapeHtml(scheme.category || 'General / All Categories');
-      const safeBenefits = escapeHtml(scheme.benefits || 'Financial benefits details available in official portal notification.');
+      const safeLevel = escapeHtml(scheme.level || (Array.isArray(scheme.educationLevels) ? scheme.educationLevels.join(', ') : 'Education Level: Check Official Guidelines'));
+      const safeCategory = escapeHtml(scheme.category || (Array.isArray(scheme.categories) && scheme.categories.length ? scheme.categories.join(', ') : 'General / All Categories'));
+      const safeBenefits = escapeHtml(scheme.benefits || scheme.benefitDescription || 'Financial benefits details available in official portal notification.');
       const safeEligibility = escapeHtml(scheme.eligibility || 'Refer to active official circular for complete eligibility thresholds.');
       const safeAcademicYear = escapeHtml(scheme.academicYear || 'Academic Session: Not Specified');
-      const safeSourceUrl = scheme.sourceUrl ? escapeHtml(scheme.sourceUrl) : '#';
+      const sourceLink = scheme.officialUrl || scheme.sourceUrl || scheme.guidelinesUrl;
+      const safeSourceUrl = sourceLink ? escapeHtml(sourceLink) : '#';
 
       card.innerHTML = `
         <div class="card-header">
           <div class="card-badges">
+            <span class="badge badge-id">${safeId}</span>
             ${verifyBadgeHtml}
             ${scopeBadgeHtml}
             <span class="badge badge-category">${safeCategory}</span>
@@ -234,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="card-footer">
-          <button type="button" class="btn-card-details" data-id="${escapeHtml(scheme.id)}">
+          <button type="button" class="btn-card-details" data-id="${safeId}">
             View Details
           </button>
           <a href="${safeSourceUrl}" target="_blank" rel="noopener noreferrer" class="btn-card-portal" title="Open official scholarship portal">
@@ -262,8 +316,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateMetrics(list) {
     if (!list) return;
     const total = list.length;
-    const karnataka = list.filter((item) => item.scope === 'Karnataka').length;
-    const verified = list.filter((item) => item.isVerified).length;
+    const karnataka = list.filter((item) => {
+      const scope = (item.scope || '').toLowerCase();
+      const state = (item.state || '').toLowerCase();
+      const portal = (item.portalName || '').toLowerCase();
+      const tags = Array.isArray(item.tags) ? item.tags.map((t) => t.toLowerCase()) : [];
+      return scope === 'karnataka' || scope === 'state' || state === 'karnataka' || portal.includes('ssp') || tags.includes('ssp');
+    }).length;
+    const verified = list.filter((item) => item.isVerified === true && item.verificationStatus !== 'pending-verification').length;
 
     metricTotal.textContent = total;
     metricKarnataka.textContent = karnataka;
@@ -277,26 +337,31 @@ document.addEventListener('DOMContentLoaded', () => {
   function openModal(scheme) {
     modalTitle.textContent = scheme.name || 'Scholarship Scheme Details';
     modalProvider.textContent = scheme.provider || 'Provider Not Specified';
-    modalLevel.textContent = scheme.level || 'Check Official Guidelines';
+    modalLevel.textContent = scheme.level || (Array.isArray(scheme.educationLevels) ? scheme.educationLevels.join(', ') : 'Check Official Guidelines');
     modalScope.textContent = `${scheme.scope || 'General'} (${scheme.portalName || 'Government Portal'})`;
     modalAcademicYear.textContent = scheme.academicYear || 'Not Specified (Check Portal)';
-    modalCategory.textContent = scheme.category || 'All Categories';
-    modalBenefits.textContent = scheme.benefits || 'Please refer to official guidelines for benefit breakdown.';
+    modalCategory.textContent = scheme.category || (Array.isArray(scheme.categories) && scheme.categories.length ? scheme.categories.join(', ') : 'All Categories');
+    modalBenefits.textContent = scheme.benefits || scheme.benefitDescription || 'Please refer to official guidelines for benefit breakdown.';
     modalEligibility.textContent = scheme.eligibility || 'Please verify active eligibility criteria directly on the official portal.';
     modalDeadlineNote.textContent = scheme.deadlineNote || 'Application deadlines vary by academic cycle. Always check the official website.';
-    modalVerificationNote.textContent = scheme.verificationNote || 'Verification details recorded by platform.';
-    modalSourceLink.href = scheme.sourceUrl || '#';
+    modalVerificationNote.textContent = scheme.verificationNote || (scheme.verificationStatus === 'pending-verification' ? 'PENDING VERIFICATION: Official guidelines and eligibility thresholds are under review. Check official portal directly.' : 'Verification details recorded by platform.');
+    modalSourceLink.href = scheme.officialUrl || scheme.sourceUrl || scheme.guidelinesUrl || '#';
 
     // Style the note block according to verification
-    if (scheme.isVerified) {
+    if (scheme.verificationStatus === 'pending-verification') {
+      modalNoteBlock.className = 'modal-block note-block is-pending-note';
+      modalStatusBadge.innerHTML = `
+        <span class="badge badge-pending">Pending Verification (${escapeHtml(scheme.id)})</span>
+      `;
+    } else if (scheme.isVerified) {
       modalNoteBlock.className = 'modal-block note-block';
       modalStatusBadge.innerHTML = `
-        <span class="badge badge-verified">Official Government Scheme</span>
+        <span class="badge badge-verified">Official Government Scheme (${escapeHtml(scheme.id)})</span>
       `;
     } else {
       modalNoteBlock.className = 'modal-block note-block is-demo-note';
       modalStatusBadge.innerHTML = `
-        <span class="badge badge-demo">Demonstration / Testing Sample Record</span>
+        <span class="badge badge-demo">Demonstration / Testing Sample Record (${escapeHtml(scheme.id)})</span>
       `;
     }
 
@@ -364,12 +429,17 @@ document.addEventListener('DOMContentLoaded', () => {
       Evaluating...
     `;
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     try {
       const response = await fetch(`${apiBaseUrl}/api/check-eligibility`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errJson = await response.json().catch(() => ({}));
@@ -385,6 +455,11 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(evalData.message || 'Failed to calculate eligibility.');
       }
     } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        alert('Evaluation request timed out after 10 seconds. Please check that the server is reachable and try again.');
+        return;
+      }
       console.error('Eligibility check error:', err);
       alert(`Evaluation Error: ${err.message}`);
     } finally {
@@ -672,6 +747,20 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  // Quick Filter via Hero Metric Cards
+  const metricKarnatakaBox = metricKarnataka?.closest('.metric-item');
+  if (metricKarnatakaBox) {
+    metricKarnatakaBox.style.cursor = 'pointer';
+    metricKarnatakaBox.setAttribute('title', 'Click to filter Karnataka SSP schemes');
+    metricKarnatakaBox.addEventListener('click', () => {
+      searchInput.value = 'Karnataka SSP';
+      clearSearchBtn.style.display = 'block';
+      syncChipsWithQuery('Karnataka SSP');
+      fetchScholarships();
+      document.getElementById('schemesSection')?.scrollIntoView({ behavior: 'smooth' });
+    });
   }
 
   // ========================================================

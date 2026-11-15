@@ -8,10 +8,11 @@
  */
 
 const express = require('express');
+const path = require('path');
 const scholarships = require('./data/scholarships');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const allowedOrigin = process.env.FRONTEND_ORIGIN || '*';
 
 app.use((req, res, next) => {
@@ -28,6 +29,10 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 
+// Serve frontend static assets directly (Unified single-server hosting)
+app.use(express.static(path.join(__dirname, '../frontend')));
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // =========================================================================
 // API ENDPOINTS
 // =========================================================================
@@ -41,31 +46,46 @@ app.get('/api/scholarships', (req, res) => {
     const { q, level, scope, type } = req.query;
     let results = [...scholarships];
 
-    // 1. Text Search Filter (Case-insensitive across multiple fields)
+    // 1. Text Search Filter (Tokenized multi-keyword search & alias matching)
     if (q && typeof q === 'string' && q.trim() !== '') {
-      const query = q.trim().toLowerCase();
-      results = results.filter((item) => {
-        const nameMatch = item.name && item.name.toLowerCase().includes(query);
-        const providerMatch = item.provider && item.provider.toLowerCase().includes(query);
-        const categoryMatch = item.category && item.category.toLowerCase().includes(query);
-        const eligibilityMatch = item.eligibility && item.eligibility.toLowerCase().includes(query);
-        const benefitsMatch = item.benefits && item.benefits.toLowerCase().includes(query);
-        const scopeMatch = item.scope && item.scope.toLowerCase().includes(query);
-        const stateMatch = item.state && item.state.toLowerCase().includes(query);
-        const portalMatch = item.portalName && item.portalName.toLowerCase().includes(query);
-        const tagsMatch = Array.isArray(item.tags) && item.tags.some((t) => t.toLowerCase().includes(query));
+      const rawQuery = q.trim().toLowerCase();
+      const tokens = rawQuery.split(/\s+/).filter(Boolean);
 
-        return (
-          nameMatch ||
-          providerMatch ||
-          categoryMatch ||
-          eligibilityMatch ||
-          benefitsMatch ||
-          scopeMatch ||
-          stateMatch ||
-          portalMatch ||
-          tagsMatch
-        );
+      results = results.filter((item) => {
+        // Direct ID match
+        if (item.id && item.id.toLowerCase() === rawQuery) return true;
+
+        // Concatenate all scheme searchable content into a single searchable text
+        const searchableParts = [
+          item.id,
+          item.name,
+          item.provider,
+          item.category,
+          Array.isArray(item.categories) ? item.categories.join(' ') : '',
+          item.eligibility,
+          item.benefits,
+          item.benefitDescription,
+          item.scope,
+          item.state,
+          item.portalName,
+          item.level,
+          Array.isArray(item.educationLevels) ? item.educationLevels.join(' ') : '',
+          Array.isArray(item.eligibleCourses) ? item.eligibleCourses.join(' ') : '',
+          item.verificationStatus,
+          Array.isArray(item.tags) ? item.tags.join(' ') : ''
+        ];
+        const haystack = searchableParts.filter(Boolean).join(' ').toLowerCase();
+
+        // Exact substring match (handles single words or exact phrases)
+        if (haystack.includes(rawQuery)) return true;
+
+        // Multi-keyword alias handling
+        if (rawQuery === 'sc st' || rawQuery === 'sc/st') {
+          return haystack.includes('sc') || haystack.includes('st') || haystack.includes('scheduled caste') || haystack.includes('scheduled tribe');
+        }
+
+        // Tokenized matching: all tokens in the query must be found in the searchable haystack
+        return tokens.every((token) => haystack.includes(token));
       });
     }
 
@@ -73,8 +93,11 @@ app.get('/api/scholarships', (req, res) => {
     if (level && level !== 'all') {
       const levelTerm = String(level).toLowerCase();
       results = results.filter((item) => {
-        if (!item.level) return false;
-        return item.level.toLowerCase().includes(levelTerm);
+        const levelStr = (item.level || '').toLowerCase();
+        const levelArr = Array.isArray(item.educationLevels)
+          ? item.educationLevels.map((l) => l.toLowerCase())
+          : [];
+        return levelStr.includes(levelTerm) || levelArr.some((l) => l.includes(levelTerm));
       });
     }
 
@@ -82,17 +105,28 @@ app.get('/api/scholarships', (req, res) => {
     if (scope && scope !== 'all') {
       const scopeTerm = String(scope).toLowerCase();
       results = results.filter((item) => {
-        if (!item.scope) return false;
-        return item.scope.toLowerCase() === scopeTerm;
+        const itemScope = (item.scope || '').toLowerCase();
+        const itemState = (item.state || '').toLowerCase();
+        const itemPortal = (item.portalName || '').toLowerCase();
+        const itemTags = Array.isArray(item.tags) ? item.tags.map((t) => t.toLowerCase()) : [];
+        if (scopeTerm === 'karnataka' || scopeTerm === 'karnataka ssp' || scopeTerm === 'ssp') {
+          return itemScope === 'karnataka' || itemScope === 'state' || itemState === 'karnataka' || itemPortal.includes('ssp') || itemTags.includes('ssp');
+        }
+        if (scopeTerm === 'central' || scopeTerm === 'nsp') {
+          return itemScope === 'central' || itemPortal.includes('nsp') || itemTags.includes('nsp');
+        }
+        return itemScope === scopeTerm;
       });
     }
 
     // 4. Verification Type Filter
     if (type && type !== 'all') {
       if (type === 'official') {
-        results = results.filter((item) => item.isVerified === true);
+        results = results.filter((item) => item.isVerified === true && item.verificationStatus !== 'pending-verification');
+      } else if (type === 'pending' || type === 'pending-verification') {
+        results = results.filter((item) => item.verificationStatus === 'pending-verification');
       } else if (type === 'demo') {
-        results = results.filter((item) => item.isVerified === false);
+        results = results.filter((item) => item.isVerified === false && item.verificationStatus !== 'pending-verification');
       }
     }
 

@@ -990,6 +990,16 @@ a:focus-visible {
   background: linear-gradient(90deg, #f59e0b, #fbbf24);
 }
 
+.scholarship-card.is-pending::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f59e0b, #8b5cf6);
+}
+
 /* Card Header */
 .card-header {
   margin-bottom: 1rem;
@@ -1024,6 +1034,22 @@ a:focus-visible {
   background-color: var(--color-demo-bg);
   color: var(--color-demo-text);
   border: 1px solid var(--color-demo-border);
+}
+
+.badge-pending {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+  font-weight: 700;
+}
+
+.badge-id {
+  background-color: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 0.725rem;
 }
 
 .badge-karnataka {
