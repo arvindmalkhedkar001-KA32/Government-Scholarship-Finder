@@ -4,25 +4,29 @@
  * Backend server for the Government Scholarship Finder using Node.js & Express.
  *
  * Capabilities:
- * 1. Hosts static frontend files (HTML, CSS, JavaScript) from the public/ folder.
- * 2. REST API: GET /api/scholarships (with keyword, education level, scope, and verification filters).
- * 3. REST API: GET /api/scholarships/:id (single scholarship lookup).
- * 4. REST API: POST /api/check-eligibility (rule-based student eligibility evaluation).
- * 5. Robust error handling, input sanitization, and health check endpoint.
+ * REST API for the separately hosted Government Scholarship Finder frontend.
  */
 
 const express = require('express');
-const path = require('path');
 const scholarships = require('./data/scholarships');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const allowedOrigin = process.env.FRONTEND_ORIGIN || '*';
 
-// Middleware to parse incoming JSON payloads
+app.use((req, res, next) => {
+  const requestOrigin = req.get('Origin');
+  if (allowedOrigin === '*' || requestOrigin === allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  }
+  if (requestOrigin) res.vary('Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 app.use(express.json());
-
-// Serve static frontend assets from public directory
-app.use(express.static(path.join(__dirname, 'public')));
 
 // =========================================================================
 // API ENDPOINTS
@@ -365,8 +369,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`🚀 Government Scholarship Finder server running!`);
-  console.log(`📍 Local URL: http://localhost:${PORT}`);
+  console.log(`📍 API URL: http://localhost:${PORT}`);
   console.log(`🏛️ Focus: Indian Scholarships with Karnataka (SSP)`);
-  console.log(`📁 Static files: ${path.join(__dirname, 'public')}`);
   console.log(`====================================================`);
 });

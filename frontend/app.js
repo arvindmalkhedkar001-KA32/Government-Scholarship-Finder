@@ -1,5 +1,5 @@
 /**
- * public/app.js
+ * frontend/app.js
  *
  * Frontend client logic for the Government Scholarship Finder.
  * Features:
@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Local state
   let currentScholarships = [];
   let searchDebounceTimer = null;
+  const apiBaseUrl = window.SCHOLARSHIP_API_BASE_URL.replace(/\/+$/, '');
 
   // ========================================================
   // 2. FETCH SCHOLARSHIPS DIRECTORY
@@ -92,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams();
     if (query) params.append('q', query);
 
-    const apiUrl = `/api/scholarships?${params.toString()}`;
+    const apiUrl = `${apiBaseUrl}/api/scholarships?${params.toString()}`;
 
     try {
       const response = await fetch(apiUrl);
@@ -364,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     try {
-      const response = await fetch('/api/check-eligibility', {
+      const response = await fetch(`${apiBaseUrl}/api/check-eligibility`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

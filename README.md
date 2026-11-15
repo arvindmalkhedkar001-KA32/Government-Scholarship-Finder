@@ -69,23 +69,26 @@ The platform curates verified government schemes across both State and Central j
   - **JavaScript (ES6+)**: Dynamic DOM manipulation, Fetch API, debounced input search, modal dialogs, and HTML entity escaping for XSS prevention.
 - **Backend**:
   - **Node.js**: Event-driven JavaScript runtime environment on Linux Mint.
-  - **Express.js (v4.x)**: REST API endpoints (`/api/scholarships`, `/api/check-eligibility`, `/api/health`) and static asset hosting.
+  - **Express.js (v4.x)**: REST API endpoints (`/api/scholarships`, `/api/check-eligibility`, `/api/health`), hosted separately from the frontend.
 
 ---
 
 ## 📁 Folder Structure
 ```text
 Government-Scholarship-Finder/
-├── data/
-│   └── scholarships.js      # Curated dataset (Karnataka SSP + Central + structured rules)
-├── public/
+├── backend/
+│   ├── data/
+│   │   └── scholarships.js  # Curated dataset and eligibility rules
+│   ├── package.json         # Backend dependencies and scripts
+│   └── server.js            # Express REST API
+├── frontend/
 │   ├── index.html           # Semantic page structure, search bar, & Eligibility Checker form
 │   ├── styles.css           # Custom responsive styles (Dark navy blue, white, & light blue)
-│   └── app.js               # Client logic (Fetch API, live search, card generation, modal)
+│   ├── app.js               # Client logic (Fetch API, live search, card generation, modal)
+│   └── config.js            # Backend API base URL
 ├── .gitignore               # Ignores node_modules, log files, and environment files
-├── package.json             # Project scripts and dependencies (Express)
+├── package.json             # Root scripts and backend workspace
 ├── README.md                # Comprehensive documentation and viva guide
-└── server.js                # Express backend server with REST endpoints & static hosting
 ```
 
 ---
@@ -104,10 +107,10 @@ npm -v
 
 1. Open your terminal and navigate to the project directory:
    ```bash
-   cd "/home/arvind/my project 1/Government-Scholarship-Finder"
+   cd Government-Scholarship-Finder
    ```
 
-2. Install dependencies:
+2. Install the backend dependencies:
    ```bash
    npm install
    ```
@@ -120,17 +123,22 @@ npm -v
 ```bash
 npm start
 ```
-Starts the server using `node server.js`.
+Starts only the backend API at `http://localhost:3000`.
 
 ### Option B: Development Mode (Auto-Reload on Code Changes)
 ```bash
 npm run dev
 ```
-Starts Node.js with the built-in `--watch` flag, automatically restarting whenever files are modified.
+Starts the backend API with Node.js built-in watch mode.
 
-### 🌐 Accessing the Website
-Once started, open your web browser (Chrome, Firefox, Chromium) and visit:
-👉 **[http://localhost:3000](http://localhost:3000)**
+### 🌐 Run the frontend separately
+Serve the `frontend/` directory with a static web server, such as VS Code Live Server, or:
+```bash
+python -m http.server 5500 --directory frontend
+```
+Then open `http://localhost:5500`. The frontend calls the API at `http://localhost:3000` by default; change `SCHOLARSHIP_API_BASE_URL` in `frontend/config.js` when the API is hosted elsewhere.
+
+For deployment, set `FRONTEND_ORIGIN` on the backend to the frontend's exact origin (for example, `https://scholarships.example.com`) to restrict cross-origin API access. It defaults to `*` for local development.
 
 To stop the server at any time, press `Ctrl + C` in your terminal.
 

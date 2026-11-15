@@ -2,10 +2,13 @@
   "name": "government-scholarship-finder",
   "version": "1.0.0",
   "description": "A college CSE web application to search and discover government scholarships with clear eligibility criteria and official source links.",
-  "main": "server.js",
+  "private": true,
+  "workspaces": [
+    "backend"
+  ],
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "npm --workspace backend start",
+    "dev": "npm --workspace backend run dev"
   },
   "keywords": [
     "scholarship",
@@ -16,8 +19,5 @@
     "nodejs"
   ],
   "author": "College CSE Project",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.21.2"
-  }
+  "license": "ISC"
 }
