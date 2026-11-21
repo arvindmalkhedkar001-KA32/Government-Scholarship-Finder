@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // UI feedback during evaluation
     checkEligibilityBtn.disabled = true;
     checkEligibilityBtn.innerHTML = `
-      <div class="spinner" style="width:16px;height:16px;border-width:2px;margin:0;display:inline-block;vertical-align:middle;"></div>
+      <span class="btn-spinner"></span>
       Evaluating...
     `;
 
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="checker-summary-banner">
         <div>
           <h3 class="summary-banner-title">Eligibility Evaluation Summary</h3>
-          <p style="font-size: 0.85rem; color: #075985; margin-top: 0.2rem;">
+          <p style="font-size: 0.85rem; color: var(--secondary-text, #655D57); margin-top: 0.2rem;">
             Profile: ${escapeHtml(userSummary.domicileState)} Domicile • ${escapeHtml(userSummary.category)} • Income: ₹${userSummary.annualIncome.toLocaleString('en-IN')} • Score: ${userSummary.percentage}%
           </p>
         </div>
@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   `).join('')}
                 </div>
                 <div class="eval-card-footer">
-                  <span style="font-size:0.8rem;color:#047857;font-weight:600;">
+                  <span style="font-size:0.8rem;color:var(--deep-bronze, #70452F);font-weight:600;">
                     Benefits: ${escapeHtml(item.scheme.benefits)}
                   </span>
                   <a href="${escapeHtml(item.scheme.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="eval-portal-btn">
@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   </div>
                 </div>
                 <div class="eval-card-footer">
-                  <span style="font-size:0.8rem;color:#92400e;">
+                  <span style="font-size:0.8rem;color:var(--primary-copper, #9A6548);">
                     Notice: Eligibility is never assumed without complete published criteria.
                   </span>
                   <a href="${escapeHtml(item.scheme.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="eval-portal-btn">
@@ -600,10 +600,10 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="eval-card is-ineligible-card">
                 <div class="eval-card-header">
                   <div>
-                    <h5 class="eval-scheme-title" style="color:#475569;">${escapeHtml(item.scheme.name)}</h5>
+                    <h5 class="eval-scheme-title" style="color:var(--secondary-text, #655D57);">${escapeHtml(item.scheme.name)}</h5>
                     <p class="eval-provider">${escapeHtml(item.scheme.provider)}</p>
                   </div>
-                  <span class="badge" style="background-color:#e2e8f0;color:#475569;">Criteria Not Met</span>
+                  <span class="badge" style="background:rgba(139,129,120,0.12);color:#655D57;border:1px solid rgba(139,129,120,0.25);">Criteria Not Met</span>
                 </div>
                 <div class="eval-reasons-list">
                   ${item.unmetReasons.map((r) => `
@@ -750,10 +750,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Quick Filter via Hero Metric Cards
-  const metricKarnatakaBox = metricKarnataka?.closest('.metric-item');
+  const metricKarnatakaBox = document.getElementById('metricKarnatakaBox');
   if (metricKarnatakaBox) {
-    metricKarnatakaBox.style.cursor = 'pointer';
-    metricKarnatakaBox.setAttribute('title', 'Click to filter Karnataka SSP schemes');
     metricKarnatakaBox.addEventListener('click', () => {
       searchInput.value = 'Karnataka SSP';
       clearSearchBtn.style.display = 'block';
